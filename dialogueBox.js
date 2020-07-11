@@ -16,9 +16,21 @@ const Dialogue = {};
 
 Dialogue.onOpen  = null;
 Dialogue.onClose = null;
-Dialogue.onMessage  = null;
+Dialogue.postMessageAction  = null;
 Dialogue.onType  = null;
+Dialouge.isTypeing = false;
+Dialogue.currentImages = false;
 
+/*
+imageModel = {
+    x: 0,
+    y: 0,
+    key: "phaserSprite",
+    onType: () => {console.log("hi")},
+    preMessage: null,
+    postMessageAction: () => {console.log("goodbye")}
+}
+*/
 
 /*
 optionsModel = {
@@ -95,23 +107,28 @@ Dialogue.setPropertyChain = (property, value) => {
     Dialogue[property] = value;
     return dialouge;
 };
-Dialogue.setOnTypeCallback = (fun) => {
-    Dialogue.onType = fun;
+Dialogue.setOnTypeCallback = (target, fun) => {
+    target.onType = fun;
 
     return Dialogue;
 };
-Dialogue.setOnMessageCallback = (fun) => {
-    Dialogue.onMessage = fun;
+Dialogue.setPostMessageActionCallback = (target, fun) => {
+    target.postMessageAction = fun;
 
     return Dialogue;
 };
+Dialogue.setonPreMessageCallback = (target, fun) => {
+    target.preMessage = fun
+
+    return Dialouge
+}
 Dialogue.setOnCloseCallback = (fun) => {
     Dialogue.onType = fun;
 
     return Dialogue;
 };
 Dialogue.setOnOpenCallback = (fun) => {
-    Dialogue.onType = fun;
+    Dialogue.onOpen = fun;
 
     return Dialogue;
 };
@@ -129,7 +146,7 @@ Dialogue.setMessageAlpha = (message, alpha) => {
 
     return messageExists;
 }
-Dialogue.displayMessage = (message, typewriter = false, call) => {
+Dialogue.displayMessage = (message, images = [], typewriter = false, call) => {
     let newMessageIsReady = !Dialogue._isTypeing;
     if (newMessageIsReady){
         Dialogue._messageText = message;
@@ -138,7 +155,7 @@ Dialogue.displayMessage = (message, typewriter = false, call) => {
         }
         if (typewriter){
             Dialogue.typewrite(message);
-            Dialogue.onMessage = call;
+            Dialogue.postMessageAction = call;
         }
         else {
             // Only support bitmap text until there's a way to use both seamlessly
@@ -160,7 +177,7 @@ Dialogue.displayMessage = (message, typewriter = false, call) => {
             let doMessageAction = typeof call === "function";
             if (doMessageAction){
                 call(Dialogue.message, message);
-                Dialogue.onMessage = null;
+                Dialogue.postMessageAction = null;
             }
         }
     }
@@ -220,11 +237,11 @@ Dialogue.timerAction = (timer) => {
     timer.stop();
     timer.destroy();
 
-    let postActionExists = typeof Dialogue.onMessage === "function";
+    let postActionExists = typeof Dialogue.postMessageAction === "function";
     let canShowNewMessage = Dialogue._que.length > 0 && Dialogue._autoTime === true;
 
     if (postActionExists){
-        Dialogue.onMessage(Dialogue.container, Dialogue._messageText);
+        Dialogue.postMessageAction(Dialogue.container, Dialogue._messageText);
     }
     if (canShowNewMessage){
         let newMessage = Dialogue._que.shift();
