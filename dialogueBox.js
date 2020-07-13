@@ -19,7 +19,7 @@ Dialogue.onClose = null;
 Dialogue.postMessageAction  = null;
 Dialogue.onType  = null;
 Dialouge.isTypeing = false;
-Dialogue.currentImages = false;
+Dialogue.currentImages = [];
 
 /*
 imageModel = {
@@ -108,22 +108,28 @@ Dialogue.setPropertyChain = (property, value) => {
     return dialouge;
 };
 Dialogue.setOnTypeCallback = (target, fun) => {
-    target.onType = fun;
+    target.onType = () => {
+        fun(target);
+    };
 
     return Dialogue;
 };
 Dialogue.setPostMessageActionCallback = (target, fun) => {
-    target.postMessageAction = fun;
+    target.postMessageAction = () => {
+        fun(target);
+    };
 
     return Dialogue;
 };
 Dialogue.setonPreMessageCallback = (target, fun) => {
-    target.preMessage = fun
+    target.preMessage = () => {
+        fun(target);
+    };
 
     return Dialouge
 }
 Dialogue.setOnCloseCallback = (fun) => {
-    Dialogue.onType = fun;
+    Dialogue.onClose= fun;
 
     return Dialogue;
 };
@@ -146,13 +152,23 @@ Dialogue.setMessageAlpha = (message, alpha) => {
 
     return messageExists;
 }
-Dialogue.displayMessage = (message, images = [], typewriter = false, call) => {
+Dialogue.displayMessage = (message, imageData = [], typewriter = false, call) => {
     let newMessageIsReady = !Dialogue._isTypeing;
     if (newMessageIsReady){
         Dialogue._messageText = message;
         if (Dialogue.message){
             Dialogue.message.destroy();
         }
+        imageData.forEach((data) => {
+            let imgShell = {
+                sprite: game.add.sprite(data.x, data.y. data.key),
+                onType: null,
+                preMessageAction: null,
+                postMessageAction: null
+            }
+            Dialogue.currentImages.push(imgShell)
+        })
+
         if (typewriter){
             Dialogue.typewrite(message);
             Dialogue.postMessageAction = call;
