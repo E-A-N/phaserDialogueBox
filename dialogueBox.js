@@ -18,7 +18,7 @@ Dialogue.onOpen  = null;
 Dialogue.onClose = null;
 Dialogue.postMessageAction  = null;
 Dialogue.onType  = null;
-Dialouge.isTypeing = false;
+Dialogue.isTypeing = false;
 Dialogue.currentImages = [];
 
 /*
@@ -152,22 +152,32 @@ Dialogue.setMessageAlpha = (message, alpha) => {
 
     return messageExists;
 }
-Dialogue.displayMessage = (message, imageData = [], typewriter = false, call) => {
+Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
+    console.log("debug testy!!")
     let newMessageIsReady = !Dialogue._isTypeing;
     if (newMessageIsReady){
         Dialogue._messageText = message;
         if (Dialogue.message){
             Dialogue.message.destroy();
         }
-        imageData.forEach((data) => {
-            let imgShell = {
-                sprite: game.add.sprite(data.x, data.y. data.key),
-                onType: null,
-                preMessageAction: null,
-                postMessageAction: null
-            }
-            Dialogue.currentImages.push(imgShell)
-        })
+        if (Array.isArray(imageData)) {
+            imageData.forEach((data) => {
+                let spriteData;
+                if (Object.keys(data).length === 4){
+                    spriteData = game.add.sprite(data.x, data.y, data.key, data.src);
+                }
+                else {
+                    spriteData = game.add.sprite(data.x, data.y, data.key);
+                }
+                let imgShell = {
+                    sprite: spriteData,
+                    onType: null,
+                    preMessageAction: null,
+                    postMessageAction: null
+                }
+                Dialogue.currentImages.push(imgShell)
+            })
+        }      
 
         if (typewriter){
             Dialogue.typewrite(message);
