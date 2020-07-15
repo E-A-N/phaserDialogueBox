@@ -46,6 +46,8 @@ optionsModel = {
     x: 0,
     y: 0
 };
+eanDebug:
+    consider adding messageWidthOffset, messageMaxHeight, messageOffsetX, messageOffsetY
 */
 
 Dialogue.init = (game, options) => {
@@ -58,7 +60,10 @@ Dialogue.init = (game, options) => {
     Dialogue.background  = game.add.sprite(0, 0, options.spriteKey, options.background);
     Dialogue.closeButton = game.add.sprite(0, 0, options.spriteKey, options.closeButton);
     Dialogue.wordWrap = options.wordWrap;
-    Dialogue.wrapWidth = options.width * 0.9;
+    Dialogue.messageWidthOffset = options.messageWidthOffset || 0;
+    Dialogue.messageXOffset = options.messageXOffset || 0;
+    Dialogue.messageYOffset = options.messageYOffset || 0;
+    Dialogue.wrapWidth = (options.width * 0.9) - Dialogue.messageWidthOffset;
     Dialogue.typeDelay = options.typeDelay || 0.01;
     Dialogue.fontFamily = options.fontFamily;
     Dialogue.fontSize   = options.fontSize;
@@ -152,22 +157,36 @@ Dialogue.setMessageAlpha = (message, alpha) => {
 
     return messageExists;
 }
+
+/**
+ * @param {string} message - the text content that will be displayed in the dialogue box.
+ * @param {object} imageData - configuration data for graphics
+ * imageDataExample = {
+ *     images: [phaserImageData],
+ *     hasNewImages: Bool,
+ *     clearCurrentImages: Bool, 
+ * }
+ * @param {bool} typewriter - condition for letters in message to be displayed sequentially
+ */
 Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
-    console.log("debug testy!!")
     let newMessageIsReady = !Dialogue._isTypeing;
     if (newMessageIsReady){
         Dialogue._messageText = message;
         if (Dialogue.message){
             Dialogue.message.destroy();
         }
-        if (Array.isArray(imageData)) {
-            imageData.forEach((data) => {
+        let imageDataExists = imageData !== null;
+        let newImagesToDisplay = imageDataExists && imageData.hasNewImages && Array.isArray(imageData.images);
+        let destroyCurrentImages = imageDataExists && Dialogue.currentImages.length > 0 && imageData.clearCurrentImages === true;
+        if (newImagesToDisplay) {
+            imageData.images.forEach((data) => {
                 let spriteData;
-                if (Object.keys(data).length === 4){
-                    spriteData = game.add.sprite(data.x, data.y, data.key, data.src);
+                let isFromSpriteSheet = Object.keys(data).length === 4;
+                if (isFromSpriteSheet){
+                    spriteData = Dialogue.game.add.sprite(data.x, data.y, data.key, data.src);
                 }
                 else {
-                    spriteData = game.add.sprite(data.x, data.y, data.key);
+                    spriteData = Dialogue.game.add.sprite(data.x, data.y, data.key);
                 }
                 let imgShell = {
                     sprite: spriteData,
@@ -177,7 +196,13 @@ Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
                 }
                 Dialogue.currentImages.push(imgShell)
             })
-        }      
+        }
+        else if (destroyCurrentImages){
+            Dialogue.currentImages.forEach((imgShell) => {
+                imgShell.sprite.destroy();
+            });
+            Dialogue.currentImages = [];
+        }   
 
         if (typewriter){
             Dialogue.typewrite(message);
@@ -185,13 +210,13 @@ Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
         }
         else {
             // Only support bitmap text until there's a way to use both seamlessly
-            Dialogue.message = game.add.bitmapText(0, 0, Dialogue.fontFamily, message, Dialogue.fontSize)
+            Dialogue.message = Dialogue.game.add.bitmapText(0, 0, Dialogue.fontFamily, message, Dialogue.fontSize)
             Dialogue.message.maxWidth = Dialogue.wrapWidth;
 
 
             //position Dialogue message in center of box
             Dialogue.message.x = (Dialogue.background.width * 0.5) - (Dialogue.message.width * 0.5);
-            Dialogue.message.y = (Dialogue.background.height * 0.05)// - (Dialogue.message.height * 0.5);
+            Dialogue.message.y = (Dialogue.background.height * 0.05) + Dialogue.messageYOffset;// - (Dialogue.message.height * 0.5);
 
             Dialogue.container.add(Dialogue.message);
 
@@ -208,7 +233,7 @@ Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
         }
     }
     else {
-        Dialogue._que.push([message, typewriter, call]);
+        Dialogue._que.push([message, imageData, typewriter, call]);
     }
     return Dialogue;
 };
@@ -220,21 +245,21 @@ Dialogue.typewrite = (message) => {
     let fontFamily = Dialogue.fontFamily;
     let fontSize   = Dialogue.fontSize;
     let xPosition  = Dialogue.background.width * 0.5;
-    let yPosition  = Dialogue.background.height * 0.25;
-    let typedText  = game.add.bitmapText(xPosition, yPosition, fontFamily, message, fontSize);
+    let yPosition  = (Dialogue.background.height * 0.25) + Dialogue.messageYOffset;
+    let typedText  = Dialogue.game.add.bitmapText(xPosition, yPosition, fontFamily, message, fontSize);
     typedText.maxWidth = Dialogue.wrapWidth;
 
     Dialogue.setMessageAlpha(typedText, 0);
 
     //Tutorial resets position for some reason?? Find out why!
     typedText.x = (Dialogue.background.width * 0.5) - (typedText.width * 0.5);
-    typedText.y = Dialogue.background.height * 0.05
+    typedText.y = (Dialogue.background.height * 0.05) + Dialogue.messageYOffset;
 
     //calculate timing
     let amountOfChars = typedText.children.length;
     let currentChar = 0;
     let delay = Phaser.Timer.SECOND * Math.min(1,Dialogue.typeDelay); //a millesecond;
-    let timer = game.time.create(false);
+    let timer = Dialogue.game.time.create(false);
     timer.start();
     Dialogue._isTypeing = true;
     timer.repeat(delay, amountOfChars, () => {
@@ -273,7 +298,6 @@ Dialogue.timerAction = (timer) => {
         let newMessage = Dialogue._que.shift();
         Dialogue.displayMessage(...newMessage);
     }
-
 };
 
 Dialogue.userInput = () => {
