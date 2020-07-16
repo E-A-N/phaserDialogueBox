@@ -90,7 +90,6 @@ Dialogue.init = (game, options) => {
 
     Dialogue.container.inputEnableChildren = true;
     Dialogue.container.onChildInputDown.add(Dialogue.userInput, Dialogue);
-    //Dialogue.background.events.onInputDown.add(Dialogue.userInput, Dialogue);
 
     return Dialogue;
 };
@@ -126,12 +125,12 @@ Dialogue.setPostMessageActionCallback = (target, fun) => {
 
     return Dialogue;
 };
-Dialogue.setonPreMessageCallback = (target, fun) => {
+Dialogue.setOnPreMessageCallback = (target, fun) => {
     target.preMessage = () => {
         fun(target);
     };
 
-    return Dialouge
+    return Dialogue
 }
 Dialogue.setOnCloseCallback = (fun) => {
     Dialogue.onClose= fun;
@@ -215,7 +214,7 @@ Dialogue.displayMessage = (message, imageData, typewriter = false, call) => {
 
 
             //position Dialogue message in center of box
-            Dialogue.message.x = (Dialogue.background.width * 0.5) - (Dialogue.message.width * 0.5);
+            Dialogue.message.x = ((Dialogue.background.width * 0.5) - (Dialogue.message.width * 0.5)) + Dialogue.messageXOffset;
             Dialogue.message.y = (Dialogue.background.height * 0.05) + Dialogue.messageYOffset;// - (Dialogue.message.height * 0.5);
 
             Dialogue.container.add(Dialogue.message);
@@ -252,7 +251,7 @@ Dialogue.typewrite = (message) => {
     Dialogue.setMessageAlpha(typedText, 0);
 
     //Tutorial resets position for some reason?? Find out why!
-    typedText.x = (Dialogue.background.width * 0.5) - (typedText.width * 0.5);
+    typedText.x = ((Dialogue.background.width * 0.5) - (typedText.width * 0.5)) + Dialogue.messageXOffset;
     typedText.y = (Dialogue.background.height * 0.05) + Dialogue.messageYOffset;
 
     //calculate timing
