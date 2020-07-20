@@ -38,6 +38,7 @@ const PhaserDialogue = () => {
         closeButton: "closeButtonSprite",
         fontSize: 14,
         fontFamily: "chillerBlack",
+        fontColor: "ffffff"
         wordWrap: true,
         typeDelay: 0.01,
         width: 600,
@@ -59,6 +60,7 @@ const PhaserDialogue = () => {
         box.messageWidthOffset = options.messageWidthOffset || 0;
         box.messageXOffset = options.messageXOffset || 0;
         box.messageYOffset = options.messageYOffset || 0;
+        box.fontColor = options.fontColor || "ffffff"
         box.wrapWidth = (options.width * 0.9) - box.messageWidthOffset;
         box.typeDelay = options.typeDelay || 0.01;
         box.fontFamily = options.fontFamily;
@@ -236,6 +238,7 @@ const PhaserDialogue = () => {
                 //position Dialogue message in center of display
                 box.message.x = ((box.background.width * 0.5) - (box.message.width * 0.5)) + box.messageXOffset;
                 box.message.y = (box.background.height * 0.05) + box.messageYOffset;// - (box.message.height * 0.5);
+                box.message.tint = box.fontColor;
 
                 box.container.add(box.message);
 
@@ -273,6 +276,9 @@ const PhaserDialogue = () => {
         //Tutorial resets position for some reason?? Find out why!
         typedText.x = ((box.background.width * 0.5) - (typedText.width * 0.5)) + box.messageXOffset;
         typedText.y = (box.background.height * 0.05) + box.messageYOffset;
+
+        typedText.tint = box.fontColor;
+
 
         //calculate timing
         let amountOfChars = typedText.children.length;
