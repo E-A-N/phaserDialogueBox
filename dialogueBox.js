@@ -38,7 +38,7 @@ const PhaserDialogue = () => {
         closeButton: "closeButtonSprite",
         fontSize: 14,
         fontFamily: "chillerBlack",
-        fontColor: "ffffff"
+        fontColor: "ffffff",
         wordWrap: true,
         typeDelay: 0.01,
         width: 600,
