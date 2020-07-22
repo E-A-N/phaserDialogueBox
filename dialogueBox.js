@@ -38,6 +38,7 @@ const PhaserDialogue = () => {
         closeButton: "closeButtonSprite",
         fontSize: 14,
         fontFamily: "chillerBlack",
+        fontColor: "ffffff",
         wordWrap: true,
         typeDelay: 0.01,
         width: 600,
@@ -54,12 +55,12 @@ const PhaserDialogue = () => {
         box.container   = game.add.group();
         box.container.x = options.x || game.width * 0.5 - (options.width * 0.5);
         box.container.y = options.y || game.height - options.height;
-        box.background  = game.add.sprite(0, 0, options.spriteKey, options.background);
-        box.closeButton = game.add.sprite(0, 0, options.spriteKey, options.closeButton);
+        box.initGuiSprites(options);
         box.wordWrap = options.wordWrap;
         box.messageWidthOffset = options.messageWidthOffset || 0;
         box.messageXOffset = options.messageXOffset || 0;
         box.messageYOffset = options.messageYOffset || 0;
+        box.fontColor = options.fontColor || "ffffff"
         box.wrapWidth = (options.width * 0.9) - box.messageWidthOffset;
         box.typeDelay = options.typeDelay || 0.01;
         box.fontFamily = options.fontFamily;
@@ -67,28 +68,52 @@ const PhaserDialogue = () => {
 
         box._isTypeing = false;
         box._que = [];
-        box._autoTime = false;
-
-        box.background.width  = options.width;
-        box.background.height = options.height;
-        box.background.inputEnabled = true;
-
-        box.container.add(box.background);
-        box.container.add(box.closeButton);
-
-        box.closeButton.width  = 50;
-        box.closeButton.height = 50;
-        box.closeButton.x = options.width/2 - box.closeButton.width/2;
-        box.closeButton.y = options.height - (box.closeButton.height + 10);
-        box.closeButton.alpha = 0;
-        box.closeButton.events.onInputDown.add(box.close, box);
-
-        box.closeButton.tint = 0x000999;
-
+        box._autoTime = false;     
+       
         box.container.inputEnableChildren = true;
         box.container.onChildInputDown.add(box.userInput, box);
 
         return box;
+    };
+    box.initGuiSprites = (options) => {
+        //init gui background
+        if ( options.spriteKey && options.background){
+            box.background  = game.add.sprite(0, 0, options.spriteKey, options.background);
+        }
+        else if (options.background){
+            box.background  = game.add.sprite(0, 0, options.background);
+        }
+        else {
+            box.background = null;
+        }
+
+        if (box.background !== null){
+            box.background.width  = options.width;
+            box.background.height = options.height;
+            box.background.inputEnabled = true;
+            box.container.add(box.background);
+        }
+        //init gui close button
+        if (options.spriteKey && options.closeButton){
+            box.closeButton = game.add.sprite(0, 0, options.spriteKey, options.closeButton);
+        }
+        else if (options.closeButton){
+            box.closeButton = game.add.sprite(0, 0, options.closeButton);
+        }
+        else {
+            box.closeButton = null;
+        }
+
+        if (box.closeButton !== null){
+            box.closeButton.width  = 50;
+            box.closeButton.height = 50;
+            box.closeButton.x = options.width/2 - box.closeButton.width/2;
+            box.closeButton.y = options.height - (box.closeButton.height + 10);
+            box.closeButton.alpha = 0;
+            box.closeButton.events.onInputDown.add(box.close, box);
+            box.closeButton.tint = 0x000999;
+            box.container.add(box.closeButton);
+        }
     };
     box.generateBackground = (width, height) => {
         let graphics = box.game.add.graphics(0,0);
@@ -164,14 +189,14 @@ const PhaserDialogue = () => {
      * }
      * @param {bool} typewriter - condition for letters in message to be displayed sequentially
      */
-    box.displayMessage = (message, imageData, typewriter = false, call) => {
+    box.displayMessage = (message, imageData = null, typewriter = false, call) => {
         let newMessageIsReady = !box._isTypeing;
         if (newMessageIsReady){
             box._messageText = message;
             if (box.message){
                 box.message.destroy();
             }
-            let imageDataExists = imageData !== null;
+            let imageDataExists = imageData !== null && typeof imageData !== "undefined";
             let newImagesToDisplay = imageDataExists && imageData.hasNewImages && Array.isArray(imageData.images);
             let destroyCurrentImages = imageDataExists && box.currentImages.length > 0 && imageData.clearCurrentImages === true;
             if (newImagesToDisplay) {
@@ -213,6 +238,7 @@ const PhaserDialogue = () => {
                 //position Dialogue message in center of display
                 box.message.x = ((box.background.width * 0.5) - (box.message.width * 0.5)) + box.messageXOffset;
                 box.message.y = (box.background.height * 0.05) + box.messageYOffset;// - (box.message.height * 0.5);
+                box.message.tint = box.fontColor;
 
                 box.container.add(box.message);
 
@@ -250,6 +276,9 @@ const PhaserDialogue = () => {
         //Tutorial resets position for some reason?? Find out why!
         typedText.x = ((box.background.width * 0.5) - (typedText.width * 0.5)) + box.messageXOffset;
         typedText.y = (box.background.height * 0.05) + box.messageYOffset;
+
+        typedText.tint = box.fontColor;
+
 
         //calculate timing
         let amountOfChars = typedText.children.length;
