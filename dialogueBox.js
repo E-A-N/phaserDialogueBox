@@ -330,9 +330,14 @@ const PhaserDialogue = () => {
         let noMessagesLeft = !box._isTypeing && box._que.length === 0;
         let permitExistingMessage = !box._isTypeing && box._que.length > 0 && box._autoTime === false;
         if (noMessagesLeft){
-            box.closeButton.alpha = 1;
-            box.closeButton.inputEnabled = true;
-            //box.close();
+            if (box.closeButton !== null) {
+                box.closeButton.alpha = 1;
+                box.closeButton.inputEnabled = true;
+            }
+            else {
+                box.close();
+            }
+            
         }
         else if (box._isTypeing) {
             box.setMessageAlpha(box.message, 1);
