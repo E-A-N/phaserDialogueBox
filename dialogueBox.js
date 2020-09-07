@@ -237,6 +237,7 @@ const PhaserDialogue = () => {
         if (newImagesToDisplay) {
             imageData.images.forEach((data) => {      
                 let spriteData = box.game.add.sprite(...data.sprite);
+                let caption = null;
                 if (data.width && typeof data.width === "number"){
                     spriteData.width = data.width;
                 }
@@ -246,22 +247,30 @@ const PhaserDialogue = () => {
                 }
 
                 if (data.caption && typeof data.caption === "string"){
-                    //add caption here
+                    let textX = spriteData.x;
+                    let textY = spriteData.height + 10 + spriteData.y;
+                    caption = box.game.add.bitmapText(textX, textY, box.fontFamily, data.caption, box.fontSize);
+                    caption.tint = box.fontColor;
+                    box.container.add(caption);
                 }
 
                 let imgShell = {
                     sprite: spriteData,
+                    caption: caption,
                     onType: null,
                     preMessageAction: null,
                     postMessageAction: null
                 }
                 box.container.add(spriteData);
                 box.currentImages.push(imgShell)
-            })
+            });
         }
         else if (destroyCurrentImages){
             box.currentImages.forEach((imgShell) => {
                 imgShell.sprite.destroy();
+                if (imgShell.caption !== null){
+                    imgShell.caption.destroy();
+                }
             });
             box.currentImages = [];
         }   
