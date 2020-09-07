@@ -52,9 +52,7 @@ const PhaserDialogue = () => {
 
         //setup background and close button functionaliity
         box.game = game;
-        box.container   = game.add.group();
-        box.container.x = options.x || game.width * 0.5 - (options.width * 0.5);
-        box.container.y = options.y || game.height - options.height;
+        box.container = box.initContainer(options);     
         box.initGuiSprites(options);
         box.wordWrap = options.wordWrap;
         box.messageWidthOffset = options.messageWidthOffset || 0;
@@ -74,6 +72,24 @@ const PhaserDialogue = () => {
         box.container.onChildInputDown.add(box.userInput, box);
 
         return box;
+    };
+    box.initContainer = (options) => {
+        let container = game.add.group();
+        
+        if (typeof options.x === "number"){
+           container.x = options.x
+        } 
+        else {
+            container.x = game.width * 0.5 - (options.width * 0.5);
+        }
+
+        if (typeof options.y === "number"){
+            container.y = options.y
+        } 
+        else {
+            container.y = game.height - options.height;
+        }
+        return container;
     };
     box.initGuiSprites = (options) => {
         //init gui background
