@@ -60,13 +60,15 @@ const PhaserDialogue = () => {
         box.messageYOffset = options.messageYOffset || 0;
         box.fontColor = options.fontColor || "ffffff"
         box.wrapWidth = (options.width * 0.9) - box.messageWidthOffset;
+        box.typewrite = options.typewrite || false;
         box.typeDelay = options.typeDelay || 0.01;
         box.fontFamily = options.fontFamily;
         box.fontSize   = options.fontSize;
 
         box._isTypeing = false;
         box._que = [];
-        box._autoTime = false;     
+        box._autoTime = false;
+        box._timer = null;     
        
         box.container.inputEnableChildren = true;
         box.container.onChildInputDown.add(box.userInput, box);
@@ -196,23 +198,23 @@ const PhaserDialogue = () => {
     }
 
     /**
-     * @param {string} message - the text content that will be displayed in the box box.
-     * @param {object} imageData - configuration data for graphics
+     * @param {object} messageData - configuration data for message parameters
      * imageDataExample = {
      *     images: [phaserImageData],
      *     hasNewImages: Bool,
      *     clearCurrentImages: Bool, 
      * }
-     * @param {bool} typewriter - condition for letters in message to be displayed sequentially
      */
-    box.displayMessage = (message, imageData = null, typewriter = false, call) => {
+    box.displayMessage = (messageData, call) => {
+        let message = messageData.message;
+        let imageData = messageData.imageData;
         let newMessageIsReady = !box._isTypeing;
         if (newMessageIsReady){
             box._messageText = message;
             if (box.message){
                 box.message.destroy();
             } 
-            if (typewriter){
+            if (box.typewrite){
                 box.typewrite(message);
                 box.postMessageAction = call;
             }
@@ -242,7 +244,7 @@ const PhaserDialogue = () => {
             box.processImageData(imageData);
         }
         else {
-            box._que.push([message, imageData, typewriter, call]);
+            box._que.push([messageData, call]);
         }
         return box;
     };
@@ -382,8 +384,10 @@ const PhaserDialogue = () => {
     };
 
     box.close = () => {
-        box._timer.stop();
-        box._timer.destroy();
+        if (box._timer !== null){
+            box._timer.stop();
+            box._timer.destroy();
+        }
         box.container.destroy();
 
         let postActionExists = typeof box.onClose === "function";
