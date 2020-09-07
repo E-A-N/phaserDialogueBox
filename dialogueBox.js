@@ -78,10 +78,10 @@ const PhaserDialogue = () => {
     box.initGuiSprites = (options) => {
         //init gui background
         if ( options.spriteKey && options.background){
-            box.background  = game.add.sprite(0, 0, options.spriteKey, options.background);
+            box.background  = box.game.add.sprite(0, 0, options.spriteKey, options.background);
         }
         else if (options.background){
-            box.background  = game.add.sprite(0, 0, options.background);
+            box.background  = box.game.add.sprite(0, 0, options.background);
         }
         else {
             box.background = null;
@@ -95,10 +95,10 @@ const PhaserDialogue = () => {
         }
         //init gui close button
         if (options.spriteKey && options.closeButton){
-            box.closeButton = game.add.sprite(0, 0, options.spriteKey, options.closeButton);
+            box.closeButton = box.game.add.sprite(0, 0, options.spriteKey, options.closeButton);
         }
         else if (options.closeButton){
-            box.closeButton = game.add.sprite(0, 0, options.closeButton);
+            box.closeButton = box.game.add.sprite(0, 0, options.closeButton);
         }
         else {
             box.closeButton = null;
@@ -195,36 +195,7 @@ const PhaserDialogue = () => {
             box._messageText = message;
             if (box.message){
                 box.message.destroy();
-            }
-            let imageDataExists = imageData !== null && typeof imageData !== "undefined";
-            let newImagesToDisplay = imageDataExists && imageData.hasNewImages && Array.isArray(imageData.images);
-            let destroyCurrentImages = imageDataExists && box.currentImages.length > 0 && imageData.clearCurrentImages === true;
-            if (newImagesToDisplay) {
-                imageData.images.forEach((data) => {
-                    let spriteData;
-                    let isFromSpriteSheet = Object.keys(data).length === 4;
-                    if (isFromSpriteSheet){
-                        spriteData = box.game.add.sprite(data.x, data.y, data.key, data.src);
-                    }
-                    else {
-                        spriteData = box.game.add.sprite(data.x, data.y, data.key);
-                    }
-                    let imgShell = {
-                        sprite: spriteData,
-                        onType: null,
-                        preMessageAction: null,
-                        postMessageAction: null
-                    }
-                    box.currentImages.push(imgShell)
-                })
-            }
-            else if (destroyCurrentImages){
-                box.currentImages.forEach((imgShell) => {
-                    imgShell.sprite.destroy();
-                });
-                box.currentImages = [];
-            }   
-
+            } 
             if (typewriter){
                 box.typewrite(message);
                 box.postMessageAction = call;
@@ -233,7 +204,6 @@ const PhaserDialogue = () => {
                 // Only support bitmap text until there's a way to use both seamlessly
                 box.message = box.game.add.bitmapText(0, 0, box.fontFamily, message, box.fontSize)
                 box.message.maxWidth = box.wrapWidth;
-
 
                 //position Dialogue message in center of display
                 box.message.x = ((box.background.width * 0.5) - (box.message.width * 0.5)) + box.messageXOffset;
@@ -253,12 +223,38 @@ const PhaserDialogue = () => {
                     box.postMessageAction = null;
                 }
             }
+            box.processImageData(imageData);
         }
         else {
             box._que.push([message, imageData, typewriter, call]);
         }
         return box;
     };
+    box.processImageData = (imageData) => {
+        let imageDataExists = imageData !== null && typeof imageData !== "undefined";
+        let newImagesToDisplay = imageDataExists && imageData.hasNewImages && Array.isArray(imageData.images);
+        let destroyCurrentImages = imageDataExists && box.currentImages.length > 0 && imageData.clearCurrentImages === true;
+        if (newImagesToDisplay) {
+            imageData.images.forEach((data) => {      
+                let spriteData = box.game.add.sprite(...data)
+                let imgShell = {
+                    sprite: spriteData,
+                    onType: null,
+                    preMessageAction: null,
+                    postMessageAction: null
+                }
+                box.container.add(spriteData);
+                box.currentImages.push(imgShell)
+            })
+        }
+        else if (destroyCurrentImages){
+            box.currentImages.forEach((imgShell) => {
+                imgShell.sprite.destroy();
+            });
+            box.currentImages = [];
+        }   
+    };
+
     box.clearQue = () => {
         box._que = [];
     }
@@ -330,9 +326,13 @@ const PhaserDialogue = () => {
         let noMessagesLeft = !box._isTypeing && box._que.length === 0;
         let permitExistingMessage = !box._isTypeing && box._que.length > 0 && box._autoTime === false;
         if (noMessagesLeft){
-            box.closeButton.alpha = 1;
-            box.closeButton.inputEnabled = true;
-            //box.close();
+            if (box.closeButton !== null) {
+                box.closeButton.alpha = 1;
+                box.closeButton.inputEnabled = true;
+            }
+            else {
+                box.close();
+            }           
         }
         else if (box._isTypeing) {
             box.setMessageAlpha(box.message, 1);
