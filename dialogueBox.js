@@ -215,7 +215,7 @@ const PhaserDialogue = () => {
                 box.message.destroy();
             } 
             if (box.typewrite){
-                box.typewrite(message);
+                box.typeout(message);
                 box.postMessageAction = call;
             }
             else {
@@ -244,10 +244,15 @@ const PhaserDialogue = () => {
             box.processImageData(imageData);
         }
         else {
+            //automatically que type written messages
             box._que.push([messageData, call]);
         }
         return box;
     };
+    box.queMessage = (messageData, call) => {
+        box._que.push([messageData, call]);
+        return box;
+    }
     box.processImageData = (imageData) => {
         let imageDataExists = imageData !== null && typeof imageData !== "undefined";
         let newImagesToDisplay = imageDataExists && imageData.hasNewImages && Array.isArray(imageData.images);
@@ -297,7 +302,7 @@ const PhaserDialogue = () => {
     box.clearQue = () => {
         box._que = [];
     }
-    box.typewrite = (message) => {
+    box.typeout = (message) => {
 
         let fontFamily = box.fontFamily;
         let fontSize   = box.fontSize;
