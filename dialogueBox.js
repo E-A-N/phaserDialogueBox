@@ -236,7 +236,19 @@ const PhaserDialogue = () => {
         let destroyCurrentImages = imageDataExists && box.currentImages.length > 0 && imageData.clearCurrentImages === true;
         if (newImagesToDisplay) {
             imageData.images.forEach((data) => {      
-                let spriteData = box.game.add.sprite(...data)
+                let spriteData = box.game.add.sprite(...data.sprite);
+                if (data.width && typeof data.width === "number"){
+                    spriteData.width = data.width;
+                }
+
+                if (data.height && typeof data.height === "number"){
+                    spriteData.height = data.height;
+                }
+
+                if (data.caption && typeof data.caption === "string"){
+                    //add caption here
+                }
+
                 let imgShell = {
                     sprite: spriteData,
                     onType: null,
