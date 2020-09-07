@@ -198,6 +198,7 @@ const PhaserDialogue = () => {
     }
 
     /**
+     * Displays a message graphic while erasing any current messages.
      * @param {object} messageData - configuration data for message parameters
      * imageDataExample = {
      *     images: [phaserImageData],
@@ -215,7 +216,7 @@ const PhaserDialogue = () => {
                 box.message.destroy();
             } 
             if (box.typewrite){
-                box.typeout(message);
+                box.typeout(messageData);
                 box.postMessageAction = call;
             }
             else {
@@ -302,13 +303,13 @@ const PhaserDialogue = () => {
     box.clearQue = () => {
         box._que = [];
     }
-    box.typeout = (message) => {
+    box.typeout = (messageData) => {
 
         let fontFamily = box.fontFamily;
         let fontSize   = box.fontSize;
         let xPosition  = box.background.width * 0.5;
         let yPosition  = (box.background.height * 0.25) + box.messageYOffset;
-        let typedText  = box.game.add.bitmapText(xPosition, yPosition, fontFamily, message, fontSize);
+        let typedText  = box.game.add.bitmapText(xPosition, yPosition, fontFamily, messageData.message, fontSize);
         typedText.maxWidth = box.wrapWidth;
 
         box.setMessageAlpha(typedText, 0);
