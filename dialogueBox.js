@@ -64,6 +64,7 @@ const PhaserDialogue = () => {
         box.typeDelay = options.typeDelay || 0.01;
         box.fontFamily = options.fontFamily;
         box.fontSize   = options.fontSize;
+        box.align = options.align
 
         box._isTypeing = false;
         box._que = [];
@@ -200,11 +201,6 @@ const PhaserDialogue = () => {
     /**
      * Displays a message graphic while erasing any current messages.
      * @param {object} messageData - configuration data for message parameters
-     * imageDataExample = {
-     *     images: [phaserImageData],
-     *     hasNewImages: Bool,
-     *     clearCurrentImages: Bool, 
-     * }
      */
     box.displayMessage = (messageData, call) => {
         let message = messageData.message;
@@ -223,6 +219,7 @@ const PhaserDialogue = () => {
                 // Only support bitmap text until there's a way to use both seamlessly
                 box.message = box.game.add.bitmapText(0, 0, box.fontFamily, message, box.fontSize)
                 box.message.maxWidth = box.wrapWidth;
+                
 
                 //position Dialogue message in center of display
                 box.message.x = ((box.background.width * 0.5) - (box.message.width * 0.5)) + box.messageXOffset;
@@ -311,6 +308,7 @@ const PhaserDialogue = () => {
         let yPosition  = (box.background.height * 0.25) + box.messageYOffset;
         let typedText  = box.game.add.bitmapText(xPosition, yPosition, fontFamily, messageData.message, fontSize);
         typedText.maxWidth = box.wrapWidth;
+        typedText.align = box.align;
 
         box.setMessageAlpha(typedText, 0);
 
