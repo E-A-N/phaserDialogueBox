@@ -11,7 +11,7 @@
 
 */
 
-const PhaserDialogue = () => {
+var PhaserDialogue = () => {
     let box = {};
     box.onOpen  = null;
     box.onClose = null;
@@ -333,7 +333,7 @@ const PhaserDialogue = () => {
 
             let typingActionExists = typeof box.onType === "function";
             if (typingActionExists){
-                box.onType(message, char);
+                box.onType(messageData.message, char);
             }
             currentChar++;
         });
